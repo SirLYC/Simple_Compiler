@@ -507,7 +507,7 @@ class Parser {
             printParseError("不是函数调用标识符: " + currentWord);
         }
 
-        if (!isDecalredProcedure()) {
+        if (!isDeclaredProcedure()) {
             printParseError("没有声明的函数: " + currentWord);
         }
         advance();
@@ -522,18 +522,21 @@ class Parser {
         advance();
     }
 
-    private boolean isDecalredProcedure() {
-        int level = currentLevel;
+    private boolean isDeclaredProcedure() {
         Procedure curProc = currentProc;
         Procedure procedure;
-        while (level >= 0 && curProc != null) {
-            procedure = new Procedure(currentWord, "integer", level, 0, 0, curProc.parent);
+        do {
+            if (curProc != null) {
+                procedure = new Procedure(currentWord, "integer", curProc.level + 1, 0, 0, curProc);
+                curProc = curProc.parent;
+            } else {
+                procedure = new Procedure(currentWord, "integer", 0, 0, 0, null);
+            }
+
             if (procedureSet.contains(procedure)) {
                 return true;
             }
-            curProc = curProc.parent;
-            level--;
-        }
+        } while (curProc != null);
         return false;
     }
 

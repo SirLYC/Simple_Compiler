@@ -1,4 +1,5 @@
 begin
+  integer m;
   integer k;
   integer function F(n);
     begin
