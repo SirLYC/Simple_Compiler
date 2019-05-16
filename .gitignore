@@ -12,7 +12,13 @@ fabric.properties
 
 *.dyd
 *.err
+*.pro
+*.var
 *.class
 .idea
 .out
 *.iml
+
+META-INF
+out
+*.jar

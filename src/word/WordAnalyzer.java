@@ -1,45 +1,23 @@
-package tas;
+package word;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.HashSet;
 import java.util.Scanner;
 import java.util.Set;
 
+import static constant.TypeCode.*;
+
 class WordAnalyzer {
     private static final Set<Character> wordBackSymbol = new HashSet<>();
     private static final Set<Character> operators = new HashSet<>();
-    private static final int BEGIN = 1;
-    private static final int END = 2;
-    private static final int INTEGER = 3;
-    private static final int IF = 4;
-    private static final int THEN = 5;
-    private static final int ELSE = 6;
-    private static final int FUNCTION = 7;
-    private static final int READ = 8;
-    private static final int WRITE = 9;
-    private static final int IDENTIFIER = 10;
-    private static final int CONSTANT = 11;
-    private static final int EUQAL = 12;
-    private static final int NOT_EQUAL = 13;
-    private static final int LESS_EQUAL = 14;
-    private static final int LESS = 15;
-    private static final int GREATER_EQUAL = 16;
-    private static final int GREATER = 17;
-    private static final int SUBTRACT = 18;
-    private static final int MULTIPLY = 19;
-    private static final int ASSIGN = 20;
-    private static final int BRACKET_LEFT = 21;
-    private static final int BRACKET_RIGHT = 22;
-    private static final int SEMICOLON = 23;
-    private static final int EOLN = 24;
-    private static final int EOF = 25;
-    private static final String ERROR_ILLEGAL_SYMBOL = "illegal symbol: \"%s\".";
-    private static final String ERROR_COLON_NOT_MATCH = "\":\" doesn't match.";
-    private static final String ERROR_OPERATOR = "illegal operator \"%s\".";
-    private static final String ERROR_SYMBOL_TOO_LONG = "symbol \"%s\" too long(>=16).";
-    private static final String ERROR_NUMBER_TOO_LONG = "number \"%s\" too long(>=16).";
+    private static final String ERROR_ILLEGAL_SYMBOL = "不合法的符号: \"%s\".";
+    private static final String ERROR_COLON_NOT_MATCH = "\":\" 不匹配";
+    private static final String ERROR_OPERATOR = "不合法的操作符 \"%s\".";
+    private static final String ERROR_SYMBOL_TOO_LONG = "符号 \"%s\" 过长(>=16).";
+    private static final String ERROR_NUMBER_TOO_LONG = "数字 \"%s\" 过长(>=16).";
 
     static {
         wordBackSymbol.add('=');
@@ -62,6 +40,11 @@ class WordAnalyzer {
     private int currentLine;
     private StringBuilder word = new StringBuilder();
 
+    private void programError(String reason) {
+        System.err.println(reason);
+        System.exit(-1);
+    }
+
     WordAnalyzer(String filename) {
         this.filename = filename;
         int index = filename.lastIndexOf(".");
@@ -75,13 +58,20 @@ class WordAnalyzer {
         outputErrorFile = name + ".err";
     }
 
-    void run() throws IOException {
+    void run() {
+        Scanner scanner;
+        try {
+            scanner = new Scanner(new File(filename).getAbsoluteFile());
+        } catch (FileNotFoundException e) {
+            programError("无法打开源文件");
+            return;
+        }
+
         try (
                 PrintWriter stdout = new PrintWriter(outputFilename);
                 PrintWriter stderr = new PrintWriter(outputErrorFile)
         ) {
             currentLine = 0;
-            Scanner scanner = new Scanner(new File(filename).getAbsoluteFile());
             while (scanner.hasNext()) {
                 currentLine++;
                 String next = scanner.nextLine();
@@ -96,6 +86,8 @@ class WordAnalyzer {
 
             stdout.flush();
             stderr.flush();
+        } catch (IOException e) {
+            programError("创建文件失败");
         }
     }
 
@@ -267,7 +259,7 @@ class WordAnalyzer {
         int type = -1;
         switch (c) {
             case '=':
-                type = EUQAL;
+                type = EQUAL;
                 break;
             case '<':
                 type = LESS;
