@@ -39,6 +39,7 @@ class WordAnalyzer {
     private int state;
     private int currentLine;
     private StringBuilder word = new StringBuilder();
+    private int errorCount;
 
     private void programError(String reason) {
         System.err.println(reason);
@@ -88,6 +89,10 @@ class WordAnalyzer {
             stderr.flush();
         } catch (IOException e) {
             programError("创建文件失败");
+        }
+        if (errorCount > 0) {
+            System.err.println("***词法分析：失败。有" + errorCount + "个错误, 具体查看" + outputErrorFile + "文件");
+            System.exit(-1);
         }
     }
 
@@ -379,6 +384,7 @@ class WordAnalyzer {
     }
 
     private void writeError(String reason, PrintWriter stderr) {
+        errorCount++;
         String s = String.format("***LINE:%d  %s", currentLine, reason);
         System.err.println(s);
         stderr.println(s);

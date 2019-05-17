@@ -1,4 +1,5 @@
 begin
+  integer m;
   integer k;
   integer function F(n);
     begin
@@ -7,6 +8,6 @@ begin
       else F:=n*F(n-1)
     end;
   read(m);
-  k:=F(m);
+  k:=F1(m);
   write(k)
 end

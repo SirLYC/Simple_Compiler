@@ -107,7 +107,7 @@ class Parser {
                 count++;
             }
             if (count > 0) {
-                programErrorAndExit("有" + count + "个错误, 具体查看" + errFilename + "文件");
+                programErrorAndExit("***语法分析：失败。有" + count + "个错误, 具体查看" + errFilename + "文件");
             }
         } catch (FileNotFoundException e) {
             programErrorAndExit("打开错误文件失败");

@@ -8,8 +8,8 @@ public class WordAnalyzerStarter {
         }
 
         WordAnalyzer wordAnalyzer = new WordAnalyzer(args[0]);
-        System.out.println("*** 词法分析：" + args[0]);
+        System.out.println("***词法分析：" + args[0]);
         wordAnalyzer.run();
-        System.out.println("*** 词法分析完成");
+        System.out.println("***词法分析完成");
     }
 }
