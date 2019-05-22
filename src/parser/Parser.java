@@ -172,8 +172,11 @@ class Parser {
 
     private void generateProcTable() {
         try (PrintWriter pw = new PrintWriter(procFilename)) {
-            for (Procedure procedure : procedureList) {
-                pw.println(String.format("%16s %16s %16d %16d %16d", procedure.name, procedure.type, procedure.level, procedure.firstVarOffset, procedure.lastVarOffset));
+            for (int i = 0; i < procedureList.size(); i++) {
+                Procedure procedure = procedureList.get(i);
+                pw.println(String.format("%16s %16s %16d %16d %16d %16d",
+                        procedure.name, procedure.type, procedure.level,
+                        procedure.firstVarOffset, procedure.lastVarOffset, i));
             }
         } catch (FileNotFoundException e) {
             programErrorAndExit("打开文件" + procFilename + "失败");
@@ -183,8 +186,8 @@ class Parser {
     private void generateVariableTable() {
         try (PrintWriter pw = new PrintWriter(varTableFilename)) {
             for (Variable variable : variableList) {
-                pw.println(String.format("%16s %16s %16d %16d %16d",
-                        variable.name, variable.proc.name, variable.kind, variable.level, variable.offset));
+                pw.println(String.format("%16s %16d %16d %16s %16d %16d",
+                        variable.name, procedureList.indexOf(variable.proc), variable.kind, variable.type, variable.level, variable.offset));
             }
         } catch (FileNotFoundException e) {
             programErrorAndExit("打开文件" + varTableFilename + "失败");
@@ -195,6 +198,8 @@ class Parser {
     private void program() {
         currentLevel = 0;
         currentProc = new Procedure("main", "void", 0, 0, 0, null);
+        procedureSet.add(currentProc);
+        procedureList.add(currentProc);
         // <程序> => <分程序>
         // <分程序> => begin<说明语句表>;<执行语句表>end
         if (currentWordType == BEGIN) {
@@ -216,7 +221,8 @@ class Parser {
 
     private void declareStatementTable() {
         // <说明语句表> => <说明语句>│<说明语句表>;<说明语句>
-        // 消除左递归: <说明语句表> => <说明语句><$说明语句表>
+        // 消除左递归:
+        // <说明语句表> => <说明语句><$说明语句表>
         // <$说明语句表> => ;<说明语句><$说明语句表>│<null>
         declareStatement();
         $declareStatementTable();
@@ -329,8 +335,9 @@ class Parser {
         // <函数体> => begin <说明语句表>；<执行语句表> end
         if (currentWordType != BEGIN) {
             printParseError("函数体开始缺少begin");
+        } else {
+            advance();
         }
-        advance();
         declareStatementTable();
         execStatementTable();
         if (currentWordType != END) {
@@ -409,8 +416,6 @@ class Parser {
             assignStatement();
         } else if (currentWordType == IF) {
             conditionStatement();
-        } else {
-            printParseError("非法符号开始：" + currentWord);
         }
     }
 
@@ -502,7 +507,7 @@ class Parser {
     }
 
     private void funcCall() {
-        // <函数调用> => <标识符>(<算数表达式>)
+        // <函数调用> => <标识符>(<算术表达式>)
         if (currentWordType != IDENTIFIER) {
             printParseError("不是函数调用标识符: " + currentWord);
         }

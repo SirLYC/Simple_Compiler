@@ -7,7 +7,15 @@ begin
       if n<=0 then F:=1
       else F:=n*F(n-1)
     end;
+  integer function F1(n);
+begin
+  integer n;
+  integer function F(n);
+begin
+  integer n;
+end;
+end;
   read(m);
-  k:=F1(m);
+  k := F(m);
   write(k)
 end

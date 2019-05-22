@@ -155,16 +155,7 @@ class WordAnalyzer {
                 break;
             case 2:
                 // error: illegal word
-                if (wordBackSymbol.contains(c) || Character.isWhitespace(c)) {
-                    writeError(String.format(ERROR_ILLEGAL_SYMBOL, word.toString()), stderr);
-                    word.delete(0, word.length());
-                    state = 0;
-                    if (wordBackSymbol.contains(c)) {
-                        processCharacter(c, stdout, stderr);
-                    }
-                } else if (isAlpha(c) || Character.isDigit(c)) {
-                    word.append(c);
-                }
+                illegalSymbol(c, stdout, stderr);
                 break;
             case 3:
                 if (wordBackSymbol.contains(c) || Character.isWhitespace(c)) {
@@ -172,21 +163,15 @@ class WordAnalyzer {
                     if (wordBackSymbol.contains(c)) {
                         processCharacter(c, stdout, stderr);
                     }
+                } else if (Character.isDigit(c)) {
+                    word.append(c);
                 } else {
+                    state = 4;
                     word.append(c);
                 }
                 break;
             case 4:
-                if (wordBackSymbol.contains(c) || Character.isWhitespace(c)) {
-                    writeError(String.format(ERROR_ILLEGAL_SYMBOL, word.toString()), stderr);
-                    word.delete(0, word.length());
-                    state = 0;
-                    if (wordBackSymbol.contains(c)) {
-                        processCharacter(c, stdout, stderr);
-                    }
-                } else {
-                    word.append(c);
-                }
+                illegalSymbol(c, stdout, stderr);
                 break;
             case 10:
                 if (c == '=') {
@@ -257,6 +242,19 @@ class WordAnalyzer {
                     word.append(c);
                 }
                 break;
+        }
+    }
+
+    private void illegalSymbol(char c, PrintWriter stdout, PrintWriter stderr) {
+        if (wordBackSymbol.contains(c) || Character.isWhitespace(c)) {
+            writeError(String.format(ERROR_ILLEGAL_SYMBOL, word.toString()), stderr);
+            word.delete(0, word.length());
+            state = 0;
+            if (wordBackSymbol.contains(c)) {
+                processCharacter(c, stdout, stderr);
+            }
+        } else {
+            word.append(c);
         }
     }
 

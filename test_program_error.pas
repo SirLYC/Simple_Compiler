@@ -1,5 +1,6 @@
 begin
   整数 k;
+  integer 1k;
   integer function F(n);
     begin
       integer n;
