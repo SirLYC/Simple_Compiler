@@ -13,6 +13,7 @@ import static constant.TypeCode.*;
 class WordAnalyzer {
     private static final Set<Character> wordBackSymbol = new HashSet<>();
     private static final Set<Character> operators = new HashSet<>();
+    private static final Set<Character> programSymbols = new HashSet<>();
     private static final String ERROR_ILLEGAL_SYMBOL = "不合法的符号: \"%s\".";
     private static final String ERROR_COLON_NOT_MATCH = "\":\" 不匹配";
     private static final String ERROR_OPERATOR = "不合法的操作符 \"%s\".";
@@ -31,6 +32,15 @@ class WordAnalyzer {
         wordBackSymbol.add(';');
         operators.addAll(wordBackSymbol);
         operators.remove(';');
+        programSymbols.addAll(wordBackSymbol);
+        for (char i = '0'; i < '9'; i++) {
+            programSymbols.add(i);
+        }
+
+        for (char i = 0; i < 'z'; i++) {
+            programSymbols.add(i);
+            programSymbols.add(Character.toUpperCase(i));
+        }
     }
 
     private final String filename;
@@ -143,14 +153,11 @@ class WordAnalyzer {
                 if (isAlpha(c) || Character.isDigit(c)) {
                     state = 1;
                     word.append(c);
-                } else if (wordBackSymbol.contains(c) || Character.isWhitespace(c)) {
+                } else {
                     analyzeSymbol(word.toString(), stdout, stderr);
-                    if (wordBackSymbol.contains(c)) {
+                    if (!Character.isWhitespace(c)) {
                         processCharacter(c, stdout, stderr);
                     }
-                } else {
-                    state = 2;
-                    word.append(c);
                 }
                 break;
             case 2:
@@ -158,16 +165,11 @@ class WordAnalyzer {
                 illegalSymbol(c, stdout, stderr);
                 break;
             case 3:
-                if (wordBackSymbol.contains(c) || Character.isWhitespace(c)) {
+                if (!Character.isDigit(c)) {
                     analyzeSymbol(word.toString(), stdout, stderr);
-                    if (wordBackSymbol.contains(c)) {
+                    if (!Character.isWhitespace(c)) {
                         processCharacter(c, stdout, stderr);
                     }
-                } else if (Character.isDigit(c)) {
-                    word.append(c);
-                } else {
-                    state = 4;
-                    word.append(c);
                 }
                 break;
             case 4:
@@ -180,10 +182,12 @@ class WordAnalyzer {
                 } else if (c == '>') {
                     state = 12;
                     analyzeSymbol(word.append('>').toString(), stdout, stderr);
-                } else if (operators.contains(c)) {
-                    state = 13;
-                    word.append(c);
-                } else {
+                }
+//                else if (operators.contains(c)) {
+//                    state = 13;
+//                    word.append(c);
+//                }
+                else {
                     analyzeSymbol(word.toString(), stdout, stderr);
                     if (!Character.isWhitespace(c)) {
                         processCharacter(c, stdout, stderr);
@@ -194,10 +198,12 @@ class WordAnalyzer {
                 if (c == '=') {
                     state = 15;
                     analyzeSymbol(word.append('=').toString(), stdout, stderr);
-                } else if (operators.contains(c)) {
-                    word.append(c);
-                    state = 16;
-                } else {
+                }
+//                else if (operators.contains(c)) {
+//                    word.append(c);
+//                    state = 16;
+//                }
+                else {
                     analyzeSymbol(word.toString(), stdout, stderr);
                     if (!Character.isWhitespace(c)) {
                         processCharacter(c, stdout, stderr);
@@ -231,7 +237,7 @@ class WordAnalyzer {
                 }
                 break;
             case 21:
-                if (wordBackSymbol.contains(c) || Character.isWhitespace(c)) {
+                if (programSymbols.contains(c) || Character.isWhitespace(c)) {
                     writeError(String.format(ERROR_ILLEGAL_SYMBOL, word.toString()), stderr);
                     word.delete(0, word.length());
                     state = 0;
@@ -349,6 +355,9 @@ class WordAnalyzer {
                 case 3:
                     writeSymbol(symbol, CONSTANT, stdout);
                     break;
+                case 10:
+                    writeSymbol(symbol, LESS, stdout);
+                    break;
                 case 11:
                     writeSymbol(symbol, LESS_EQUAL, stdout);
                     break;
@@ -356,6 +365,9 @@ class WordAnalyzer {
                     writeSymbol(symbol, NOT_EQUAL, stdout);
                     break;
                 case 14:
+                    writeSymbol(symbol, GREATER, stdout);
+                    break;
+                case 15:
                     writeSymbol(symbol, GREATER_EQUAL, stdout);
                     break;
                 case 18:
@@ -391,4 +403,5 @@ class WordAnalyzer {
     private boolean isAlpha(char c) {
         return ('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z');
     }
+
 }
